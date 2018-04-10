@@ -1,7 +1,11 @@
+// Sæt vores globale variabler til at starte
+require('./config/config');
 const port = process.env.PORT || 7777;
 
 const express = require('express');
 const bodyParser = require('body-parser');
+
+const { mongoose } = require('./db/db');
 
 // Sæt Expess i gang
 const app = express();
