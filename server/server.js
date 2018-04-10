@@ -7,6 +7,8 @@ const bodyParser = require('body-parser');
 
 const { mongoose } = require('./db/db');
 
+const { Festival } = require('./models/Festival');
+
 // Sæt Expess i gang
 const app = express();
 
@@ -14,11 +16,27 @@ app.use(bodyParser.json());
 
 // Hent alle festivaler
 app.get('/festivals', (req, res) => {
-  res.status(200).send('Her er en masse festivaler');
+  Festival.find()
+    .then((festivals) => {
+      res.status(200).send(festivals);
+    })
+    .catch((err) => {
+      res.status(400).send(err);      
+    });
 });
 
+// POST/ Opret festivaler
 app.post('/festivals', (req, res) => {
-  res.status(200).send(req.body.navn);
+  let festival = new Festival();
+  festival.name = req.body.name;
+  festival.availability = req.body.availability;
+  festival.save()
+    .then((festival) => {
+      res.status(201).send(festival);
+    })
+    .catch((err) => {
+      res.status(400).send(err);
+    });
 });
 
 // Start server
