@@ -93,4 +93,4 @@ const Festival = mongoose.model('Festival', FestivalSchema);
 
 module.exports = {
   Festival
-}
+};

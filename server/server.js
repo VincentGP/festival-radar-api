@@ -1,11 +1,11 @@
 // Sæt vores globale variabler til at starte
 require('./config/config');
+require('./db/db');
+
 const port = process.env.PORT || 7777;
 
 const express = require('express');
 const bodyParser = require('body-parser');
-
-// const { mongoose } = require('./db/db');
 
 const { Festival } = require('./models/Festival');
 
