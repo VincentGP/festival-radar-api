@@ -4,7 +4,6 @@
   "description": "",
   "main": "server/server.js",
   "scripts": {
-    "lint": "./node_modules/.bin/eslint server/server.js; exit 0",
     "dev": "nodemon server/server.js"
   },
   "author": "",
