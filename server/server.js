@@ -5,7 +5,7 @@ const port = process.env.PORT || 7777;
 const express = require('express');
 const bodyParser = require('body-parser');
 
-const { mongoose } = require('./db/db');
+// const { mongoose } = require('./db/db');
 
 const { Festival } = require('./models/Festival');
 
@@ -41,5 +41,5 @@ app.post('/festivals', (req, res) => {
 
 // Start server
 app.listen(port, () => {
-  console.log(`Startede server 😛`);
+  console.log('Startede server 😛');
 });

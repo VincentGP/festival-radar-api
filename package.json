@@ -2,13 +2,15 @@
   "name": "festival-radar",
   "version": "1.0.0",
   "description": "",
-  "main": "test.js",
+  "main": "server/server.js",
   "scripts": {
+    "lint": "./node_modules/.bin/eslint server/server.js",
     "dev": "nodemon server/server.js"
   },
   "author": "",
   "license": "ISC",
   "devDependencies": {
+    "eslint": "^4.19.1",
     "nodemon": "^1.17.3"
   },
   "dependencies": {
