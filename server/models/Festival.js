@@ -49,33 +49,6 @@ const FestivalSchema = new mongoose.Schema({
     type: String,
     // required: true
   },
-  news: [{
-    title: {
-      type: String
-    },
-    body: {
-      type: String
-    },
-    date: {
-      type: Date,
-      default: Date.now()
-    },
-    comments: [{
-      comment: {
-        type: String
-      },
-      creator: {
-        type: String
-      },
-      creatorId: {
-        type: mongoose.Schema.Types.ObjectId
-      },
-      date: {
-        type: Date,
-        default: Date.now()
-      }
-    }]
-  }],
   video: {
     type: String
   },
