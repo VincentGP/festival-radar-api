@@ -16,6 +16,25 @@ module.exports = (app) => {
         res.status(400).send(err);
       });
   });
+  // GET: Hent specifik festival baseret på ID
+  app.get('/festivals/:id', (req, res) => {
+    // Gem id fra URL
+    let id = req.params.id;
+    // Hvis id ikke er et valid ObjectID
+    if (!ObjectID.isValid(id)) {
+      return res.status(404).send('Invalid ObjectID');
+    }
+    Festival.findById(id)
+      .then((festival) => {
+        // Hvis festival ikke kunne findes i databasen
+        if (!festival) return res.status(404).send();
+        // Festivalen blev fundet og vi sender den tilbage til brugeren
+        res.status(200).send(festival);
+      })
+      .catch((err) => {
+        res.status(400).send(err);
+      });
+  });
   // POST: Opret festival
   app.post('/festivals', (req, res) => {
     // Vælg de værdier som vi skal bruge fra request body
@@ -44,4 +63,5 @@ module.exports = (app) => {
         res.status(400).send(err);
       });
   });
+  // PATCH: Opdater festival
 };
