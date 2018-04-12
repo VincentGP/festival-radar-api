@@ -4,6 +4,17 @@ const { ObjectID } = require('mongodb');
 
 // Interne imports
 const { Festival } = require('../models/Festival');
+const body = [];
+
+Festival.schema.eachPath((path) => {
+  if (path != '_id' && path != '__v') {
+    body.push(path);
+  }
+});
+
+console.log(body);
+
+
 
 module.exports = (app) => {
   // GET: Hent alle festivaler
@@ -64,4 +75,9 @@ module.exports = (app) => {
       });
   });
   // PATCH: Opdater festival
+  app.patch('/festivals/:id', (req, res) => {
+    // Gem id fra URL
+    let id = req.params.id;
+
+  });
 };
