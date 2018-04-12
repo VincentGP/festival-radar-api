@@ -80,4 +80,24 @@ module.exports = (app) => {
         res.status(400).send(err);
       });
   });
+  // DELETE: Slet festival
+  app.delete('/festivals/:id', (req, res) => {
+    // Gem id fra URL
+    let id = req.params.id;
+    // Hvis id'et ikke er et korrekt ObjectID
+    if (!ObjectID.isValid(id)) {
+      return res.status(404).send();
+    }
+    // Find festival baseret på id og slet
+    Festival.findByIdAndRemove(id)
+      .then((festival) => {
+        // Hvis festivalen ikke findes i databasen
+        if (!festival) return res.status(404).send();
+        // Send den slettede festival tilbage til klienten
+        res.status(200).send(festival);
+      })
+      .catch((err) => {
+        res.status(400).send(err);
+      });
+  });
 };
