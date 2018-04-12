@@ -4,14 +4,7 @@ const { ObjectID } = require('mongodb');
 
 // Interne imports
 const { Festival } = require('../models/Festival');
-
-// Generer automatisk body baseret på modellen og gem i variabel
-const festivalBody = [];
-Festival.schema.eachPath((path) => {
-  if (path != '_id' && path != '__v') {
-    festivalBody.push(path);
-  }
-});
+const { getModelProperties } = require('../helpers/helpers');
 
 module.exports = (app) => {
   // GET: Hent alle festivaler
@@ -46,7 +39,7 @@ module.exports = (app) => {
   // POST: Opret festival
   app.post('/festivals', (req, res) => {
     // Vælg de værdier som vi skal bruge fra request body
-    let body = _.pick(req.body, festivalBody);
+    let body = _.pick(req.body, getModelProperties(Festival));
     // Lav ny festival instance og sæt værdier til hvad der er blevet sendt med
     let festival = new Festival(body);
     // Gem festival i database
@@ -63,7 +56,7 @@ module.exports = (app) => {
     // Gem id fra URL
     let id = req.params.id;
     // Vælg de værdier som vi skal bruge fra request body
-    let body = _.pick(req.body, festivalBody);
+    let body = _.pick(req.body, getModelProperties(Festival));
     // Hvis id'et ikke er et korrekt ObjectID
     if (!ObjectID.isValid(id)) {
       return res.status(404).send();
