@@ -20,6 +20,7 @@ app.use(bodyParser.json());
 // Her importerer vi alle vores routes
 require('./routes/festivals')(app);
 require('./routes/articles')(app);
+require('./routes/artists')(app);
 
 // Start server
 app.listen(port, () => {
