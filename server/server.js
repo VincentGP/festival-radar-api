@@ -21,6 +21,7 @@ app.use(bodyParser.json());
 require('./routes/festivals')(app);
 require('./routes/articles')(app);
 require('./routes/artists')(app);
+require('./routes/users')(app);
 
 // Start server
 app.listen(port, () => {

@@ -13,7 +13,8 @@ const UserSchema = new mongoose.Schema({
   },
   email: {
     type: String,
-    required: true
+    required: true,
+    unique: true
   },
   password: {
     type: String,
@@ -62,6 +63,9 @@ UserSchema.methods.generateAuthToken = function () {
   return user.save()
     .then(() => {
       return token;
+    })
+    .catch(() => {
+      return 'Token kunne ikke genereres';
     });
 };
 
