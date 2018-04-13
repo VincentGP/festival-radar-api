@@ -93,4 +93,32 @@ module.exports = (app) => {
         res.status(400).send(err);
       });
   });
+  // POST: Opret kommentar
+  app.post('/articles/:id/comment', (req, res) => {
+    // Gem artiklens id
+    let id = req.params.id;
+    // Hvis id'et ikke er et korrekt ObjectID
+    if (!ObjectID.isValid(id)) {
+      return res.status(404).send();
+    }
+    // Lav kommentar baseret på body
+    let comment = _.pick(req.body, ['comment']);
+    // Find artikel baseret på id
+    Article.findById(id)
+      .then((article) => {
+        // Tilføj kommentar til artikel
+        article.comments.push(comment);
+        // Gem så artiklen efter kommentar er blevet tilføjet
+        article.save()
+          .then((article) => {
+            res.status(201).send(article);
+          })
+          .catch((err) => {
+            res.status(400).send(err); 
+          });
+      })
+      .catch((err) => {
+        res.status(400).send(err);
+      });
+  });
 };
