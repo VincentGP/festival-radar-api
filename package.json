@@ -4,7 +4,6 @@
   "description": "",
   "main": "server/server.js",
   "scripts": {
-    "lint": "./node_modules/.bin/eslint server/server.js; exit 0",
     "dev": "nodemon server/server.js"
   },
   "author": "",
@@ -16,6 +15,9 @@
   "dependencies": {
     "body-parser": "^1.18.2",
     "express": "^4.16.3",
-    "mongoose": "^5.0.14"
+    "lodash": "^4.17.5",
+    "mongodb": "^3.0.6",
+    "mongoose": "^5.0.14",
+    "nodemailer": "^4.6.4"
   }
 }

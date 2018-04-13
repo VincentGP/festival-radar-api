@@ -2,42 +2,24 @@
 require('./config/config');
 require('./db/db');
 
+// Hvis applikationen er lokal kører vi på port 7777
 const port = process.env.PORT || 7777;
 
+// Eksterne imports
 const express = require('express');
 const bodyParser = require('body-parser');
 
-const { Festival } = require('./models/Festival');
+// Interne imports
 
 // Sæt Expess i gang
 const app = express();
 
+// Middleware til at parse requests
 app.use(bodyParser.json());
 
-// Hent alle festivaler
-app.get('/festivals', (req, res) => {
-  Festival.find()
-    .then((festivals) => {
-      res.status(200).send(festivals);
-    })
-    .catch((err) => {
-      res.status(400).send(err);      
-    });
-});
-
-// POST/ Opret festivaler
-app.post('/festivals', (req, res) => {
-  let festival = new Festival();
-  festival.name = req.body.name;
-  festival.availability = req.body.availability;
-  festival.save()
-    .then((festival) => {
-      res.status(201).send(festival);
-    })
-    .catch((err) => {
-      res.status(400).send(err);
-    });
-});
+// Her importerer vi alle vores routes
+require('./routes/festivals')(app);
+require('./routes/articles')(app);
 
 // Start server
 app.listen(port, () => {

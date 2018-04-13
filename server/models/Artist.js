@@ -13,7 +13,7 @@ const ArtistSchema = new mongoose.Schema({
     type: String
   },
   popularity: {
-    type: number,
+    type: Number,
     default: 0
   }
 });
@@ -22,4 +22,4 @@ const Artist = mongoose.model('Artist', ArtistSchema);
 
 module.exports = {
   Artist
-}
+};
