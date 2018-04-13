@@ -40,12 +40,10 @@ const UserSchema = new mongoose.Schema({
   followedFestivals: [{
     type: mongoose.Schema.Types.ObjectId
   }],
-  tokens: [{
-    token: {
-      type: String,
-      require: true
-    }
-  }]
+  authToken: {
+    type: String,
+    require: true
+  }
 });
 
 // Når man bruger .methods laver man instance methods (metoder vi kan bruge herinde)
@@ -58,7 +56,7 @@ UserSchema.methods.generateAuthToken = function () {
   // Vi genererer en JWT token baseret på vores secret og laver resultatet om til en string
   let token = jwt.sign({ _id: user._id.toHexString() }, process.env.JWT_SECRET).toString();
   // Gem token til brugeren vi arbejder med
-  user.tokens.push({ token });
+  user.authToken = token;
   // Gem brugeren og returner token
   return user.save()
     .then(() => {
@@ -72,13 +70,11 @@ UserSchema.methods.generateAuthToken = function () {
 // Metode som bruges til at fjerne tokens på brugeren
 UserSchema.methods.removeToken = function() {
   // Brugeren vi arbejder med
-  let user = this;    
+  let user = this;  
   // Fjern elementer fra array som matcher vores kriterier med $pull
   return user.update({
     $pull: {
-      tokens: {
-        token: user.tokens[0].token
-      }
+      authToken: user.authToken
     }
   });
 };
@@ -99,8 +95,8 @@ UserSchema.statics.findByToken = function(token) {
   }
   // Hvis verificering lykkedes finder vi brugeren baseret på id og token og returnerer
   return User.findOne({
-    '_id': decoded._id,
-    'tokens.token': token
+    _id: decoded._id,
+    authToken: token
   });
 };
 
