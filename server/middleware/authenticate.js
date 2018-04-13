@@ -14,7 +14,7 @@ const authenticate = (req, res, next) => {
       }
       // Her modificerer vi request objektet(sætter bruger og token på det) og sender det videre så vi kan eksekvere resten af vores flow i vores routes fil
       req.user = user;
-      req.token = token;
+      req.authToken = token;
       next();
     })
     .catch((err) => {            

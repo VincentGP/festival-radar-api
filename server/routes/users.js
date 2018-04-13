@@ -1,5 +1,6 @@
 // Eksterne imports
 const _ = require('lodash');
+const { ObjectID } = require('mongodb');
 
 // Interne imports
 const { User } = require('../models/User');
@@ -67,6 +68,106 @@ module.exports = (app) => {
       })
       .catch((err) => {
         res.status(400).send(err);
+      });
+  });
+  // POST: Tilføj kunster til favoritter
+  app.post('/users/artists', authenticate, (req, res) => {
+    // Gem nuværende bruger
+    let user = req.user;
+    let artistId = ObjectID(req.body.artistId);
+    // Hvis id'et ikke er et korrekt ObjectID    
+    if (!ObjectID.isValid(artistId)) {
+      return res.status(404).send();
+    }
+    // Push kunstner til brugerens favorit array
+    user.update({ $addToSet: { followedArtists: artistId } })
+      .then((user) => {
+        res.status(200).send(user);
+      })
+      .catch((err) => {
+        res.status(400).send(err); 
+      });
+  });
+  // POST: Tilføj festival til favoritter
+  app.post('/users/festivals', authenticate, (req, res) => {
+    // Gem nuværende bruger
+    let user = req.user;    
+    let festivalId = ObjectID(req.body.festivalId);
+    // Hvis id'et ikke er et korrekt ObjectID    
+    if (!ObjectID.isValid(festivalId)) {
+      return res.status(404).send();
+    }
+    // Push festival til brugerens favorit array
+    user.update({ $addToSet: { followedFestivals: festivalId } })
+      .then((user) => {
+        res.status(200).send(user);
+      })
+      .catch((err) => {
+        res.status(400).send(err); 
+      });
+  });
+  // POST: Tilføj genre til favoritter
+  app.post('/users/genres', authenticate, (req, res) => {
+    // Gem nuværende bruger
+    let user = req.user;      
+    let genre = req.body.genre;
+    // Push genre til brugerens favorit array
+    user.update({ $addToSet: { followedGenres: genre } })
+      .then((user) => {
+        res.status(200).send(user);
+      })
+      .catch((err) => {
+        res.status(400).send(err); 
+      });
+  });
+  // DELETE: Fjern kunstner fra favoritter
+  app.delete('/users/artists', authenticate, (req, res) => {
+    // Gem nuværende bruger
+    let user = req.user;
+    let artistId = ObjectID(req.body.artistId);
+    // Hvis id'et ikke er et korrekt ObjectID    
+    if (!ObjectID.isValid(artistId)) {      
+      return res.status(404).send();
+    }
+    // Fjern kunstner fra brugerens favorit array
+    user.update({ $pull: { followedArtists: artistId } })
+      .then((user) => {
+        res.status(200).send(user);
+      })
+      .catch((err) => {
+        res.status(400).send(err); 
+      });
+  });
+  // DELETE: Fjern festival fra favoritter
+  app.delete('/users/festivals', authenticate, (req, res) => {
+    // Gem nuværende bruger
+    let user = req.user;
+    let festivalId = ObjectID(req.body.festivalId);
+    // Hvis id'et ikke er et korrekt ObjectID    
+    if (!ObjectID.isValid(festivalId)) {      
+      return res.status(404).send();
+    }
+    // Fjern festival fra brugerens favorit array
+    user.update({ $pull: { followedFestivals: festivalId } })
+      .then((user) => {
+        res.status(200).send(user);
+      })
+      .catch((err) => {
+        res.status(400).send(err); 
+      });
+  });
+  // DELETE: Fjern genre fra favoritter
+  app.delete('/users/genres', authenticate, (req, res) => {
+    // Gem nuværende bruger
+    let user = req.user;
+    let genre = req.body.genre;
+    // Fjern genre fra brugerens favorit array
+    user.update({ $pull: { followedGenres: genre } })
+      .then((user) => {
+        res.status(200).send(user);
+      })
+      .catch((err) => {
+        res.status(400).send(err); 
       });
   });
 };
