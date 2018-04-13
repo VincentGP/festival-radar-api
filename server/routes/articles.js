@@ -5,6 +5,7 @@ const { ObjectID } = require('mongodb');
 // Interne imports
 const { Article } = require('../models/Article');
 const { getModelProperties } = require('../helpers/helpers');
+const { authenticate } = require('../middleware/authenticate');
 
 module.exports = (app) => {
   // GET: Hent alle artikler
@@ -88,6 +89,37 @@ module.exports = (app) => {
         if (!article) return res.status(404).send();
         // Send den slettede artikel tilbage til klienten
         res.status(200).send(article);
+      })
+      .catch((err) => {
+        res.status(400).send(err);
+      });
+  });
+  // POST: Opret kommentar
+  app.post('/articles/:id/comment', authenticate, (req, res) => {
+    // Gem artiklens id
+    let id = req.params.id;
+    let user = req.user;
+    // Hvis id'et ikke er et korrekt ObjectID
+    if (!ObjectID.isValid(id)) {
+      return res.status(404).send();
+    }
+    // Lav kommentar baseret på body og brugeren som er logget ind
+    let comment = _.pick(req.body, ['comment']);
+    comment.creator = user.email;
+    comment.creatorId = user._id;    
+    // Find artikel baseret på id
+    Article.findById(id)
+      .then((article) => {
+        // Tilføj kommentar til artikel
+        article.comments.push(comment);
+        // Gem så artiklen efter kommentar er blevet tilføjet
+        article.save()
+          .then((article) => {
+            res.status(201).send(article);
+          })
+          .catch((err) => {
+            res.status(400).send(err); 
+          });
       })
       .catch((err) => {
         res.status(400).send(err);

@@ -13,7 +13,8 @@ const ArticleSchema = new mongoose.Schema({
   },
   comments: [{
     comment: {
-      type: String
+      type: String,
+      required: true
     },
     creator: {
       type: String
