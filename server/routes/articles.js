@@ -5,6 +5,7 @@ const { ObjectID } = require('mongodb');
 // Interne imports
 const { Article } = require('../models/Article');
 const { getModelProperties } = require('../helpers/helpers');
+const { authenticate } = require('../middleware/authenticate');
 
 module.exports = (app) => {
   // GET: Hent alle artikler
@@ -94,15 +95,18 @@ module.exports = (app) => {
       });
   });
   // POST: Opret kommentar
-  app.post('/articles/:id/comment', (req, res) => {
+  app.post('/articles/:id/comment', authenticate, (req, res) => {
     // Gem artiklens id
     let id = req.params.id;
+    let user = req.user;
     // Hvis id'et ikke er et korrekt ObjectID
     if (!ObjectID.isValid(id)) {
       return res.status(404).send();
     }
-    // Lav kommentar baseret på body
+    // Lav kommentar baseret på body og brugeren som er logget ind
     let comment = _.pick(req.body, ['comment']);
+    comment.creator = user.email;
+    comment.creatorId = user._id;    
     // Find artikel baseret på id
     Article.findById(id)
       .then((article) => {
