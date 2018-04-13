@@ -3,6 +3,7 @@ const _ = require('lodash');
 
 // Interne imports
 const { User } = require('../models/User');
+const { authenticate } = require('../middleware/authenticate');
 
 module.exports = (app) => {
   // POST: Signup som almindelig bruger
@@ -48,6 +49,23 @@ module.exports = (app) => {
       })
       .catch((err) => {
         // Hvis bruger ikke kunne findes        
+        res.status(400).send(err);
+      });
+  });
+  // HEAD: Validér token ved automatisk login
+  app.head('/users/validate', authenticate, (req, res) => {
+    res.status(200).send();
+  });
+  // DELETE: Log bruger ud
+  app.delete('/users', authenticate, (req, res) => {
+    // Brugerobjektet + token (der kommer fra req) stammer fra vores authenticate middleware
+    let user = req.user;
+    let token = req.token;
+    user.removeToken(token)
+      .then(() => {
+        res.status(200).send();
+      })
+      .catch((err) => {
         res.status(400).send(err);
       });
   });

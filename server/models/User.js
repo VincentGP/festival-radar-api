@@ -73,7 +73,7 @@ UserSchema.methods.removeToken = function() {
   let user = this;  
   // Fjern elementer fra array som matcher vores kriterier med $pull
   return user.update({
-    $pull: {
+    $unset: {
       authToken: user.authToken
     }
   });
