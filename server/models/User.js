@@ -127,13 +127,34 @@ UserSchema.statics.findByCredentials = function(email, password) {
 // Dette bliver kørt inden bruger bliver gemt
 UserSchema.pre('save', function(next) {
   // Brugeren vi arbejder med
-  let user = this;
+  let user = this;  
   // Kør kun hvis det er passwordet der er ændret eller oprettet
   if (user.isModified('password')) {
     // Generer salt (10 runder)
     bcrypt.genSalt(10, (err, salt) => {
       // Generer hash baseret på brugerens plaintext password
       bcrypt.hash(user.password, salt, (err, hash) => {
+        // Sæt kodeordet til den hashede udgave
+        user.password = hash;
+        // Lad flowet fortsætte
+        next();
+      });
+    });
+  } else {
+    next();
+  }
+});
+
+// Password skal hashes igen hvis brugeren har opdateret det
+UserSchema.pre('findOneAndUpdate', function(next) {  
+  // De dele af brugeren som er blevet opdateret
+  let user = this._update.$set;  
+  // Kør kun hvis det er passwordet der er ændret eller oprettet
+  if (user.password) {
+    // Generer salt (10 runder)
+    bcrypt.genSalt(10, (err, salt) => {    
+      // Generer hash baseret på brugerens plaintext password
+      bcrypt.hash(user.password, salt, (err, hash) => {            
         // Sæt kodeordet til den hashede udgave
         user.password = hash;
         // Lad flowet fortsætte

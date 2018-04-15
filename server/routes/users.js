@@ -5,7 +5,7 @@ const { ObjectID } = require('mongodb');
 // Interne imports
 const { User } = require('../models/User');
 const { authenticate } = require('../middleware/authenticate');
-const { incrementPopularityArtist, incrementPopularityFestival } = require('../helpers/helpers');
+const { incrementPopularityArtist, incrementPopularityFestival, getModelProperties } = require('../helpers/helpers');
 
 module.exports = (app) => {
   // POST: Signup som almindelig bruger
@@ -57,6 +57,28 @@ module.exports = (app) => {
   // HEAD: Validér token ved automatisk login
   app.head('/users/validate', authenticate, (req, res) => {
     res.status(200).send();
+  });
+  // PATCH: Opdater brugeren som er logget ind
+  app.patch('/users', authenticate, (req, res) => {
+    // Gem id fra URL
+    let id = req.user._id;
+    // Vælg de værdier som vi skal bruge fra request body
+    let body = _.pick(req.body, getModelProperties(User));
+    // Hvis id'et ikke er et korrekt ObjectID
+    if (!ObjectID.isValid(id)) {
+      return res.status(404).send();
+    }
+    // Bestem hvad der skal opdateres (body) og få returneret den opdaterede bruger
+    User.findByIdAndUpdate(id, { $set: body }, { new: true })
+      .then((user) => {
+        // Hvis brugeren ikke kan findes i databasen
+        if (!user) return res.status(404).send();
+        // Send bruger til klient
+        res.status(200).send(user);
+      })
+      .catch((err) => {
+        res.status(400).send(err);
+      });
   });
   // DELETE: Log bruger ud
   app.delete('/users', authenticate, (req, res) => {
