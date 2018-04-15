@@ -8,14 +8,18 @@ const port = process.env.PORT || 7777;
 // Eksterne imports
 const express = require('express');
 const bodyParser = require('body-parser');
-
-// Interne imports
+const cors = require('cors');
 
 // Sæt Expess i gang
 const app = express();
 
 // Middleware til at parse requests
 app.use(bodyParser.json());
+
+// Hvis vi arbejder lokalt så slå CORS til på alt
+if (port === 7777) {
+  app.use(cors());
+}
 
 // Her importerer vi alle vores routes
 require('./routes/festivals')(app);
