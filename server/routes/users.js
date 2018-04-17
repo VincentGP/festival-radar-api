@@ -1,17 +1,35 @@
 // Eksterne imports
 const _ = require('lodash');
 const { ObjectID } = require('mongodb');
+const fileUpload = require('express-fileupload');
+// const multer  = require('multer');
+// const upload = multer({ dest: 'uploads/' });
 
 // Interne imports
 const { User } = require('../models/User');
 const { authenticate } = require('../middleware/authenticate');
-const { incrementPopularityArtist, incrementPopularityFestival } = require('../helpers/helpers');
+const { incrementPopularityArtist, incrementPopularityFestival, getModelProperties } = require('../helpers/helpers');
 
 module.exports = (app) => {
+  // Fortæl Express at vi skal bruge fil upload library
+  app.use(fileUpload());
   // POST: Signup som almindelig bruger
   app.post('/users', (req, res) => {
+    // console.log(req.files);
+    // Hvis der er uploadet nogle filer
+    if (req.files) {
+      let file = req.files.avatar;
+      // mv() bruges til at flytte filen
+      file.mv(`server/uploads/${file.name}`, (err) => {
+        if (err) {
+          return res.status(400).send(err);          
+        }        
+      });
+    }
     // Lav bruger object baseret på request
-    let user = new User(_.pick(req.body, ['email', 'password', 'firstName', 'lastName']));    
+    let user = new User(_.pick(req.body, ['email', 'password', 'firstName', 'lastName']));
+    // Tilføj billede reference til bruger
+    user.imagePath = req.files.avatar.name;
     // Gem bruger
     user.save()
       .then((user) => {
@@ -57,6 +75,28 @@ module.exports = (app) => {
   // HEAD: Validér token ved automatisk login
   app.head('/users/validate', authenticate, (req, res) => {
     res.status(200).send();
+  });
+  // PATCH: Opdater brugeren som er logget ind
+  app.patch('/users', authenticate, (req, res) => {
+    // Gem id fra URL
+    let id = req.user._id;
+    // Vælg de værdier som vi skal bruge fra request body
+    let body = _.pick(req.body, getModelProperties(User));
+    // Hvis id'et ikke er et korrekt ObjectID
+    if (!ObjectID.isValid(id)) {
+      return res.status(404).send();
+    }
+    // Bestem hvad der skal opdateres (body) og få returneret den opdaterede bruger
+    User.findByIdAndUpdate(id, { $set: body }, { new: true })
+      .then((user) => {
+        // Hvis brugeren ikke kan findes i databasen
+        if (!user) return res.status(404).send();
+        // Send bruger til klient
+        res.status(200).send(user);
+      })
+      .catch((err) => {
+        res.status(400).send(err);
+      });
   });
   // DELETE: Log bruger ud
   app.delete('/users', authenticate, (req, res) => {
