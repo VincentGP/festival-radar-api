@@ -20,7 +20,7 @@ module.exports = (app) => {
     if (req.files) {
       let file = req.files.avatar;
       // mv() bruges til at flytte filen
-      file.mv(`server/uploads/${file.name}`, (err) => {
+      file.mv(`server/public/uploads/${file.name}`, (err) => {
         if (err) {
           return res.status(400).send(err);          
         }        
@@ -72,13 +72,14 @@ module.exports = (app) => {
         res.status(400).send(err);
       });
   });
-  // HEAD: Validér token ved automatisk login
-  app.head('/users/validate', authenticate, (req, res) => {
-    res.status(200).send();
+  // GET: Validér token ved automatisk login og send brugeren med tilbage
+  app.get('/users/validate', authenticate, (req, res) => {
+    let user = req.user;    
+    res.status(200).send(user);
   });
   // PATCH: Opdater brugeren som er logget ind
   app.patch('/users', authenticate, (req, res) => {
-    // Gem id fra URL
+    // Gem id
     let id = req.user._id;
     // Vælg de værdier som vi skal bruge fra request body
     let body = _.pick(req.body, getModelProperties(User));

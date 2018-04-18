@@ -16,6 +16,9 @@ const app = express();
 // Middleware til at parse requests
 app.use(bodyParser.json());
 
+// Server statiske filer
+app.use(express.static(__dirname + '/public'));
+
 // Hvis vi arbejder lokalt så slå CORS til på alt
 if (port === 7777) {
   app.use(cors());
