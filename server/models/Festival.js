@@ -1,4 +1,6 @@
+// Eksterne imports
 const mongoose = require('mongoose');
+const URLSlugs = require('mongoose-url-slugs');
 
 const FestivalSchema = new mongoose.Schema({
   location: {
@@ -61,6 +63,9 @@ const FestivalSchema = new mongoose.Schema({
     default: 0
   }
 });
+
+// Lav venlig URL slug baseret på navn
+FestivalSchema.plugin(URLSlugs('name'));
 
 const Festival = mongoose.model('Festival', FestivalSchema);
 
