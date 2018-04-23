@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const URLSlugs = require('mongoose-url-slugs');
 
 const ArticleSchema = new mongoose.Schema({
   title: {
@@ -10,6 +11,9 @@ const ArticleSchema = new mongoose.Schema({
   date: {
     type: Date,
     default: Date.now()
+  },
+  image: {
+    type: String
   },
   comments: [{
     comment: {
@@ -28,6 +32,9 @@ const ArticleSchema = new mongoose.Schema({
     }
   }]
 });
+
+// Lav venlig URL slug baseret på navn
+ArticleSchema.plugin(URLSlugs('title'));
 
 const Article = mongoose.model('Article', ArticleSchema);
 

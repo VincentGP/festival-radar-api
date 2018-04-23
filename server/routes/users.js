@@ -2,8 +2,6 @@
 const _ = require('lodash');
 const { ObjectID } = require('mongodb');
 const fileUpload = require('express-fileupload');
-// const multer  = require('multer');
-// const upload = multer({ dest: 'uploads/' });
 
 // Interne imports
 const { User } = require('../models/User');
@@ -13,9 +11,9 @@ const { incrementPopularityArtist, incrementPopularityFestival, getModelProperti
 module.exports = (app) => {
   // Fortæl Express at vi skal bruge fil upload library
   app.use(fileUpload());
+  
   // POST: Signup som almindelig bruger
   app.post('/users', (req, res) => {
-    // console.log(req.files);
     // Hvis der er uploadet nogle filer
     if (req.files) {
       let file = req.files.avatar;
@@ -27,7 +25,7 @@ module.exports = (app) => {
       });
     }
     // Lav bruger object baseret på request
-    let user = new User(_.pick(req.body, ['email', 'password', 'firstName', 'lastName']));
+    let user = new User(_.pick(req.body, ['email', 'password', 'firstName', 'lastName', 'location']));
     // Tilføj billede reference til bruger
     user.imagePath = req.files.avatar.name;
     // Gem bruger

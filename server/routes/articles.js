@@ -1,6 +1,7 @@
 // Eksterne imports
 const _ = require('lodash');
 const { ObjectID } = require('mongodb');
+const fileUpload = require('express-fileupload');
 
 // Interne imports
 const { Article } = require('../models/Article');
@@ -8,6 +9,9 @@ const { getModelProperties } = require('../helpers/helpers');
 const { authenticate } = require('../middleware/authenticate');
 
 module.exports = (app) => {
+  // Fortæl Express at vi skal bruge fil upload library
+  app.use(fileUpload());
+
   // GET: Hent alle artikler
   app.get('/articles', (req, res) => {
     Article.find()
@@ -39,11 +43,21 @@ module.exports = (app) => {
   });
   // POST: Opret artikel
   app.post('/articles', (req, res) => {
+    // Hvis der er uploadet nogle filer
+    if (req.files) {
+      let file = req.files.image;
+      // mv() funktion bruges til at flytte filen
+      file.mv(`server/public/uploads/${file.name}`, (err) => {
+        if (err) {
+          return res.status(400).send(err);
+        }
+      });
+    }
     // Vælg de værdier som vi skal bruge fra request body
-    let body = _.pick(req.body, getModelProperties(Article));
-    // Lav ny artikel instance og sæt værdier til hvad der er blevet sendt med
-    let article = new Article(body);
-    // Gem articel i database
+    let article = new Article(_.pick(req.body, ['title', 'body']));
+    // Tilføj billede reference til bruger (eller tom string)
+    article.image = req.files.image.name || '';
+    // Gem artikel i database
     article.save()
       .then((article) => {
         res.status(201).send(article);
