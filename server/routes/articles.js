@@ -109,9 +109,9 @@ module.exports = (app) => {
       });
   });
   // POST: Opret kommentar
-  app.post('/articles/:id/comment', authenticate, (req, res) => {
+  app.post('/articles/:slug/comment', authenticate, (req, res) => {
     // Gem artiklens id
-    let id = req.params.id;
+    let id = req.body._id;
     let user = req.user;
     // Hvis id'et ikke er et korrekt ObjectID
     if (!ObjectID.isValid(id)) {
