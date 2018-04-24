@@ -111,18 +111,14 @@ module.exports = (app) => {
   // POST: Opret kommentar
   app.post('/articles/:slug/comment', authenticate, (req, res) => {
     // Gem artiklens id
-    let id = req.body._id;
     let user = req.user;
-    // Hvis id'et ikke er et korrekt ObjectID
-    if (!ObjectID.isValid(id)) {
-      return res.status(404).send();
-    }
+    let slug = req.params.slug;
     // Lav kommentar baseret på body og brugeren som er logget ind
     let comment = _.pick(req.body, ['comment']);
     comment.creator = user.email;
     comment.creatorId = user._id;    
     // Find artikel baseret på id
-    Article.findById(id)
+    Article.findOne({ slug })
       .then((article) => {
         // Tilføj kommentar til artikel
         article.comments.push(comment);
@@ -135,7 +131,7 @@ module.exports = (app) => {
             res.status(400).send(err); 
           });
       })
-      .catch((err) => {
+      .catch((err) => {        
         res.status(400).send(err);
       });
   });
