@@ -1,17 +1,14 @@
 // Eksterne imports
 const _ = require('lodash');
 const { ObjectID } = require('mongodb');
-const fileUpload = require('express-fileupload');
 
 // Interne imports
 const { Article } = require('../models/Article');
-const { getModelProperties } = require('../helpers/helpers');
+const { User } = require('../models/User');
+const { getModelProperties, dedupeIDs } = require('../helpers/helpers');
 const { authenticate } = require('../middleware/authenticate');
 
 module.exports = (app) => {
-  // Fortæl Express at vi skal bruge fil upload library
-  app.use(fileUpload());
-
   // GET: Hent alle artikler
   app.get('/articles', (req, res) => {
     Article.find()
@@ -40,6 +37,11 @@ module.exports = (app) => {
       .catch((err) => {
         res.status(400).send(err);
       });
+  });
+
+  app.post('/upload', (req, res) => {
+    res.send(req.files);
+    
   });
   // POST: Opret artikel
   app.post('/articles', (req, res) => {
@@ -132,6 +134,31 @@ module.exports = (app) => {
           });
       })
       .catch((err) => {        
+        res.status(400).send(err);
+      });
+  });
+  // GET: Returnerer brugere som har kommenteret på en artikel
+  app.get('/articles/:slug/users', (req, res) => {
+    // Gem id fra URL
+    let slug = req.params.slug;
+    Article.findOne({ slug })
+      .then((article) => {
+        // Hvis artikel ikke kunne findes i databasen
+        if (!article) return res.status(404).send();
+        // Gem ObjectIDs og fjern mulige duplikeringer
+        let objectIDs = dedupeIDs(article.comments.map(comment => comment.creatorId));
+        // Find frem til brugerne som har kommenteret baseret på id'erne og vælg så felter vi vil have sendt med
+        User.find({
+          _id: { $in: objectIDs }
+        }).select(['firstName', 'imagePath'])
+          .then((users) => {
+            res.status(200).send(users);
+          })
+          .catch((err) => {
+            res.status(400).send(err);
+          });
+      })
+      .catch((err) => {
         res.status(400).send(err);
       });
   });

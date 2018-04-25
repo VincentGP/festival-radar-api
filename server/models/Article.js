@@ -20,9 +20,6 @@ const ArticleSchema = new mongoose.Schema({
       type: String,
       required: true
     },
-    creator: {
-      type: String
-    },
     creatorId: {
       type: mongoose.Schema.Types.ObjectId
     },
