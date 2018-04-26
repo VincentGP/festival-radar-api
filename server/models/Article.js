@@ -27,7 +27,8 @@ const ArticleSchema = new mongoose.Schema({
       type: Date,
       default: Date.now()
     }
-  }]
+  }],
+  tags: [String]
 });
 
 // Lav venlig URL slug baseret på navn
