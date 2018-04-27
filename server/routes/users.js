@@ -1,9 +1,6 @@
 // Eksterne imports
 const _ = require('lodash');
 const { ObjectID } = require('mongodb');
-const fileUpload = require('express-fileupload');
-// const multer  = require('multer');
-// const upload = multer({ dest: 'uploads/' });
 
 // Interne imports
 const { User } = require('../models/User');
@@ -11,25 +8,22 @@ const { authenticate } = require('../middleware/authenticate');
 const { incrementPopularityArtist, incrementPopularityFestival, getModelProperties } = require('../helpers/helpers');
 
 module.exports = (app) => {
-  // Fortæl Express at vi skal bruge fil upload library
-  app.use(fileUpload());
   // POST: Signup som almindelig bruger
   app.post('/users', (req, res) => {
-    // console.log(req.files);
-    // Hvis der er uploadet nogle filer
+    // Lav bruger object baseret på request
+    let user = new User(_.pick(req.body, ['email', 'password', 'firstName', 'lastName', 'location']));
+    // Hvis der er uploadet nogle filer       
     if (req.files) {
-      let file = req.files.avatar;
+      let file = req.files.avatar;      
+      // Tilføj billede reference til bruger
+      user.imagePath = req.files.avatar.name;
       // mv() bruges til at flytte filen
-      file.mv(`server/uploads/${file.name}`, (err) => {
+      file.mv(`server/public/uploads/${file.name}`, (err) => {
         if (err) {
-          return res.status(400).send(err);          
-        }        
+          return res.status(400).send(err);
+        }
       });
     }
-    // Lav bruger object baseret på request
-    let user = new User(_.pick(req.body, ['email', 'password', 'firstName', 'lastName']));
-    // Tilføj billede reference til bruger
-    user.imagePath = req.files.avatar.name;
     // Gem bruger
     user.save()
       .then((user) => {
@@ -72,13 +66,14 @@ module.exports = (app) => {
         res.status(400).send(err);
       });
   });
-  // HEAD: Validér token ved automatisk login
-  app.head('/users/validate', authenticate, (req, res) => {
-    res.status(200).send();
+  // GET: Validér token ved automatisk login og send brugeren med tilbage
+  app.get('/users/validate', authenticate, (req, res) => {
+    let user = req.user;    
+    res.status(200).send(user);
   });
   // PATCH: Opdater brugeren som er logget ind
   app.patch('/users', authenticate, (req, res) => {
-    // Gem id fra URL
+    // Gem id
     let id = req.user._id;
     // Vælg de værdier som vi skal bruge fra request body
     let body = _.pick(req.body, getModelProperties(User));
@@ -132,10 +127,10 @@ module.exports = (app) => {
       });
   });
   // POST: Tilføj festival til favoritter
-  app.post('/users/festivals', authenticate, (req, res) => {
+  app.post('/users/festivals/:id', authenticate, (req, res) => {
     // Gem nuværende bruger
     let user = req.user;    
-    let festivalId = ObjectID(req.body.festivalId);
+    let festivalId = ObjectID(req.params.id);
     // Hvis id'et ikke er et korrekt ObjectID    
     if (!ObjectID.isValid(festivalId)) {
       return res.status(404).send();
@@ -184,12 +179,12 @@ module.exports = (app) => {
       });
   });
   // DELETE: Fjern festival fra favoritter
-  app.delete('/users/festivals', authenticate, (req, res) => {
+  app.delete('/users/festivals/:id', authenticate, (req, res) => {
     // Gem nuværende bruger
     let user = req.user;
-    let festivalId = ObjectID(req.body.festivalId);
+    let festivalId = ObjectID(req.params.id);
     // Hvis id'et ikke er et korrekt ObjectID    
-    if (!ObjectID.isValid(festivalId)) {      
+    if (!ObjectID.isValid(festivalId)) {
       return res.status(404).send();
     }
     // Fjern festival fra brugerens favorit array

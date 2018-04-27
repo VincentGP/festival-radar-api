@@ -4,7 +4,8 @@ const { ObjectID } = require('mongodb');
 
 // Interne imports
 const { Article } = require('../models/Article');
-const { getModelProperties } = require('../helpers/helpers');
+const { User } = require('../models/User');
+const { getModelProperties, dedupeIDs } = require('../helpers/helpers');
 const { authenticate } = require('../middleware/authenticate');
 
 module.exports = (app) => {
@@ -37,13 +38,28 @@ module.exports = (app) => {
         res.status(400).send(err);
       });
   });
+
+  app.post('/upload', (req, res) => {
+    res.send(req.files);
+    
+  });
   // POST: Opret artikel
   app.post('/articles', (req, res) => {
+    // Hvis der er uploadet nogle filer
+    if (req.files) {
+      let file = req.files.image;
+      // mv() funktion bruges til at flytte filen
+      file.mv(`server/public/uploads/${file.name}`, (err) => {
+        if (err) {
+          return res.status(400).send(err);
+        }
+      });
+    }
     // Vælg de værdier som vi skal bruge fra request body
-    let body = _.pick(req.body, getModelProperties(Article));
-    // Lav ny artikel instance og sæt værdier til hvad der er blevet sendt med
-    let article = new Article(body);
-    // Gem articel i database
+    let article = new Article(_.pick(req.body, ['title', 'body']));
+    // Tilføj billede reference til bruger (eller tom string)
+    article.image = req.files.image.name || '';
+    // Gem artikel i database
     article.save()
       .then((article) => {
         res.status(201).send(article);
@@ -95,20 +111,16 @@ module.exports = (app) => {
       });
   });
   // POST: Opret kommentar
-  app.post('/articles/:id/comment', authenticate, (req, res) => {
+  app.post('/articles/:slug/comment', authenticate, (req, res) => {
     // Gem artiklens id
-    let id = req.params.id;
     let user = req.user;
-    // Hvis id'et ikke er et korrekt ObjectID
-    if (!ObjectID.isValid(id)) {
-      return res.status(404).send();
-    }
+    let slug = req.params.slug;
     // Lav kommentar baseret på body og brugeren som er logget ind
     let comment = _.pick(req.body, ['comment']);
     comment.creator = user.email;
     comment.creatorId = user._id;    
     // Find artikel baseret på id
-    Article.findById(id)
+    Article.findOne({ slug })
       .then((article) => {
         // Tilføj kommentar til artikel
         article.comments.push(comment);
@@ -119,6 +131,31 @@ module.exports = (app) => {
           })
           .catch((err) => {
             res.status(400).send(err); 
+          });
+      })
+      .catch((err) => {        
+        res.status(400).send(err);
+      });
+  });
+  // GET: Returnerer brugere som har kommenteret på en artikel
+  app.get('/articles/:slug/users', (req, res) => {
+    // Gem id fra URL
+    let slug = req.params.slug;
+    Article.findOne({ slug })
+      .then((article) => {
+        // Hvis artikel ikke kunne findes i databasen
+        if (!article) return res.status(404).send();
+        // Gem ObjectIDs og fjern mulige duplikeringer
+        let objectIDs = dedupeIDs(article.comments.map(comment => comment.creatorId));
+        // Find frem til brugerne som har kommenteret baseret på id'erne og vælg så felter vi vil have sendt med
+        User.find({
+          _id: { $in: objectIDs }
+        }).select(['firstName', 'imagePath'])
+          .then((users) => {
+            res.status(200).send(users);
+          })
+          .catch((err) => {
+            res.status(400).send(err);
           });
       })
       .catch((err) => {

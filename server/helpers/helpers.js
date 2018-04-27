@@ -31,8 +31,15 @@ const incrementPopularityFestival = (id) => {
     });
 };
 
+const dedupeIDs = (objectIDs) => {
+  const ids = {};
+  objectIDs.forEach(_id => (ids[_id.toString()] = _id));
+  return Object.values(ids);
+};
+
 module.exports = {
   getModelProperties,
   incrementPopularityArtist,
-  incrementPopularityFestival
+  incrementPopularityFestival,
+  dedupeIDs
 };
