@@ -127,10 +127,10 @@ module.exports = (app) => {
       });
   });
   // POST: Tilføj festival til favoritter
-  app.post('/users/festivals', authenticate, (req, res) => {
+  app.post('/users/festivals/:id', authenticate, (req, res) => {
     // Gem nuværende bruger
     let user = req.user;    
-    let festivalId = ObjectID(req.body.festivalId);
+    let festivalId = ObjectID(req.params.id);
     // Hvis id'et ikke er et korrekt ObjectID    
     if (!ObjectID.isValid(festivalId)) {
       return res.status(404).send();
@@ -179,12 +179,12 @@ module.exports = (app) => {
       });
   });
   // DELETE: Fjern festival fra favoritter
-  app.delete('/users/festivals', authenticate, (req, res) => {
+  app.delete('/users/festivals/:id', authenticate, (req, res) => {
     // Gem nuværende bruger
     let user = req.user;
-    let festivalId = ObjectID(req.body.festivalId);
+    let festivalId = ObjectID(req.params.id);
     // Hvis id'et ikke er et korrekt ObjectID    
-    if (!ObjectID.isValid(festivalId)) {      
+    if (!ObjectID.isValid(festivalId)) {
       return res.status(404).send();
     }
     // Fjern festival fra brugerens favorit array
