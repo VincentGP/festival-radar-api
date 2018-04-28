@@ -22,7 +22,7 @@ const FestivalSchema = new mongoose.Schema({
     // required: true
   },
   artists: [{
-    type: String
+    type: mongoose.Schema.Types.ObjectId
   }],
   startDate: {
     type: Date,

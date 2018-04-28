@@ -26,9 +26,6 @@ const UserSchema = new mongoose.Schema({
   followedArtists: [{
     type: mongoose.Schema.Types.ObjectId
   }],
-  followedGenres: [{
-    type: String
-  }],
   followedLocations: [{
     city: {
       type: String

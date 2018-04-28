@@ -123,7 +123,7 @@ module.exports = (app) => {
         res.status(200).send(user);
       })
       .catch((err) => {
-        res.status(400).send(err); 
+        res.status(400).send(err);
       });
   });
   // POST: Tilføj festival til favoritter
@@ -139,20 +139,6 @@ module.exports = (app) => {
     incrementPopularityFestival(festivalId);
     // Push festival til brugerens favorit array
     user.update({ $addToSet: { followedFestivals: festivalId } })
-      .then((user) => {
-        res.status(200).send(user);
-      })
-      .catch((err) => {
-        res.status(400).send(err); 
-      });
-  });
-  // POST: Tilføj genre til favoritter
-  app.post('/users/genres', authenticate, (req, res) => {
-    // Gem nuværende bruger
-    let user = req.user;      
-    let genre = req.body.genre;
-    // Push genre til brugerens favorit array
-    user.update({ $addToSet: { followedGenres: genre } })
       .then((user) => {
         res.status(200).send(user);
       })
@@ -194,20 +180,6 @@ module.exports = (app) => {
       })
       .catch((err) => {
         res.status(400).send(err); 
-      });
-  });
-  // DELETE: Fjern genre fra favoritter
-  app.delete('/users/genres', authenticate, (req, res) => {
-    // Gem nuværende bruger
-    let user = req.user;
-    let genre = req.body.genre;
-    // Fjern genre fra brugerens favorit array
-    user.update({ $pull: { followedGenres: genre } })
-      .then((user) => {
-        res.status(200).send(user);
-      })
-      .catch((err) => {
-        res.status(400).send(err);
       });
   });
 };
