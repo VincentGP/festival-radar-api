@@ -127,7 +127,8 @@ module.exports = (app) => {
         // Gem så artiklen efter kommentar er blevet tilføjet
         article.save()
           .then((article) => {
-            res.status(201).send(article);
+            // Send kommentarer med tilbage
+            res.status(200).send(article.comments);
           })
           .catch((err) => {
             res.status(400).send(err); 

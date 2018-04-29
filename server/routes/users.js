@@ -58,7 +58,7 @@ module.exports = (app) => {
         return user.generateAuthToken()
           .then((token) => {
             // Send header tilbage til bruger med brugerinfo, token og udløbstid
-            res.header('x-auth', token).status(200).send({ user, expiresIn: 3600 });
+            res.header('x-auth', token).status(200).send({ user, expiresIn: 3600 * 24 });
           });
       })
       .catch((err) => {
@@ -107,10 +107,10 @@ module.exports = (app) => {
       });
   });
   // POST: Tilføj kunster til favoritter
-  app.post('/users/artists', authenticate, (req, res) => {
+  app.post('/users/artists/:id', authenticate, (req, res) => {
     // Gem nuværende bruger
     let user = req.user;
-    let artistId = ObjectID(req.body.artistId);
+    let artistId = ObjectID(req.params.id);
     // Hvis id'et ikke er et korrekt ObjectID    
     if (!ObjectID.isValid(artistId)) {
       return res.status(404).send();
@@ -147,10 +147,10 @@ module.exports = (app) => {
       });
   });
   // DELETE: Fjern kunstner fra favoritter
-  app.delete('/users/artists', authenticate, (req, res) => {
+  app.delete('/users/artists/:id', authenticate, (req, res) => {
     // Gem nuværende bruger
     let user = req.user;
-    let artistId = ObjectID(req.body.artistId);
+    let artistId = ObjectID(req.params.id);
     // Hvis id'et ikke er et korrekt ObjectID    
     if (!ObjectID.isValid(artistId)) {      
       return res.status(404).send();
