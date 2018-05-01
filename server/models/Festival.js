@@ -3,20 +3,21 @@ const mongoose = require('mongoose');
 const URLSlugs = require('mongoose-url-slugs');
 
 const FestivalSchema = new mongoose.Schema({
-  location: {
-    address: {
-      type: String
-    },
-    city: {
-      type: String
-    },
-    zip: {
-      type: Number
-    },
-    country: {
-      type: String
-    }
-    // required: true
+  address: {
+    type: String,
+    required: true    
+  },
+  city: {
+    type: String,
+    required: true    
+  },
+  zip: {
+    type: String,
+    required: true    
+  },
+  country: {
+    type: String,
+    required: true
   },
   artists: [{
     type: mongoose.Schema.Types.ObjectId

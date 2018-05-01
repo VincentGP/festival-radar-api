@@ -17,31 +17,22 @@ module.exports = (app) => {
         res.status(400).send(err);
       });
   });
-  // GET: Hent specifik festival baseret på ID
-  app.get('/festivals/:id', (req, res) => {
-    // Gem id fra URL
-    let id = req.params.id;
-    // Hvis id ikke er et valid ObjectID
-    if (!ObjectID.isValid(id)) {
-      return res.status(404).send('Invalid ObjectID');
-    }
-    Festival.findById(id)
-      .then((festival) => {
-        // Hvis festival ikke kunne findes i databasen
-        if (!festival) return res.status(404).send();
-        // Festivalen blev fundet og vi sender den tilbage til brugeren
-        res.status(200).send(festival);
-      })
-      .catch((err) => {
-        res.status(400).send(err);
-      });
-  });
   // POST: Opret festival
   app.post('/festivals', (req, res) => {
     // Vælg de værdier som vi skal bruge fra request body
-    let body = _.pick(req.body, getModelProperties(Festival));
-    // Lav ny festival instance og sæt værdier til hvad der er blevet sendt med
-    let festival = new Festival(body);
+    let festival = new Festival(_.pick(req.body, ['link', 'description', 'name', 'startDate', 'endDate', 'address', 'zip', 'city', 'country']));
+    // Hvis der er uploadet nogle filer       
+    if (req.files) {
+      let file = req.files.poster;      
+      // Tilføj billede reference til festival
+      festival.poster = req.files.poster.name;
+      // mv() bruges til at flytte filen
+      file.mv(`server/public/uploads/festivals/${file.name}`, (err) => {
+        if (err) {
+          return res.status(400).send(err);
+        }
+      });
+    }
     // Gem festival i database
     festival.save()
       .then((festival) => {
