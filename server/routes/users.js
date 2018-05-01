@@ -5,7 +5,7 @@ const { ObjectID } = require('mongodb');
 // Interne imports
 const { User } = require('../models/User');
 const { authenticate } = require('../middleware/authenticate');
-const { incrementPopularityArtist, incrementPopularityFestival, getModelProperties } = require('../helpers/helpers');
+const { incrementPopularityArtist, incrementPopularityFestival, getModelProperties, decrementPopularityArtist, decrementPopularityFestival } = require('../helpers/helpers');
 
 module.exports = (app) => {
   // POST: Signup som almindelig bruger
@@ -155,6 +155,8 @@ module.exports = (app) => {
     if (!ObjectID.isValid(artistId)) {      
       return res.status(404).send();
     }
+    // Dekrementer popularitet
+    decrementPopularityArtist(artistId);
     // Fjern kunstner fra brugerens favorit array
     user.update({ $pull: { followedArtists: artistId } })
       .then((user) => {
@@ -173,6 +175,8 @@ module.exports = (app) => {
     if (!ObjectID.isValid(festivalId)) {
       return res.status(404).send();
     }
+    // Dekrementer popularitet
+    decrementPopularityFestival(festivalId);
     // Fjern festival fra brugerens favorit array
     user.update({ $pull: { followedFestivals: festivalId } })
       .then((user) => {
