@@ -15,10 +15,7 @@ const FestivalSchema = new mongoose.Schema({
     },
     country: {
       type: String
-    },
-    latLong: [{
-      type: String
-    }]
+    }
     // required: true
   },
   artists: [{
@@ -26,37 +23,27 @@ const FestivalSchema = new mongoose.Schema({
   }],
   startDate: {
     type: Date,
+    required: true
   },
   endDate: {
     type: Date,
-    // required: true
+    required: true
   },
   name: {
     type: String,
-    // required: true,
+    required: true,
     unique: true
-  },
-  price: {
-    type: String
-  },
-  availability: {
-    type: Number,
-    min: 1,
-    max: 3
   },
   poster: {
     type: String
   },
   description: {
     type: String,
-    // required: true
-  },
-  video: {
-    type: String
+    required: true
   },
   link: {
     type: String,
-    // required: true
+    required: true
   },
   popularity: {
     type: Number,
