@@ -39,9 +39,19 @@ module.exports = (app) => {
   // POST: Opret kunster
   app.post('/artists', (req, res) => {
     // Vælg de værdier som vi skal bruge fra request body
-    let body = _.pick(req.body, getModelProperties(Artist));
-    // Lav ny kunstner instance og sæt værdier til hvad der er blevet sendt med
-    let artist = new Artist(body);
+    let artist = new Artist(_.pick(req.body, ['name', 'description', 'genre']));
+    // Hvis der er uploadet nogle filer       
+    if (req.files) {
+      let file = req.files.image;      
+      // Tilføj billede reference til bruger
+      artist.image = req.files.image.name;
+      // mv() bruges til at flytte filen
+      file.mv(`server/public/uploads/artists/${file.name}`, (err) => {
+        if (err) {
+          return res.status(400).send(err);
+        }
+      });
+    }
     // Gem kunstner i database
     artist.save()
       .then((artist) => {
