@@ -1,4 +1,3 @@
-// Interne imports
 const { User } = require('../models/User');
 
 // Middleware authenticate
