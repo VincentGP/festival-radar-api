@@ -88,10 +88,8 @@ module.exports = (app) => {
   });
   // DELETE: Log bruger ud
   app.delete('/users', authenticate, (req, res) => {
-    // Brugerobjektet + token (der kommer fra req) stammer fra vores authenticate middleware
     let user = req.user;
-    let token = req.token;
-    user.removeToken(token)
+    user.removeToken()
       .then(() => {
         res.status(200).send();
       })

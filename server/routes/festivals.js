@@ -7,7 +7,7 @@ const { Festival } = require('../models/Festival');
 const { getModelProperties } = require('../helpers/helpers');
 
 module.exports = (app) => {
-  // GET: Hent alle festivaler
+  // GET: All festivals
   app.get('/festivals', (req, res) => {
     Festival.find()
       .then((festivals) => {

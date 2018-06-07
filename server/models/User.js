@@ -59,11 +59,11 @@ UserSchema.methods.generateAuthToken = function () {
     });
 };
 
-// Metode som bruges til at fjerne tokens på brugeren
+// Remove authentication token from user
 UserSchema.methods.removeToken = function() {
-  // Brugeren vi arbejder med
+  // The current user
   let user = this;  
-  // Fjern elementer fra array som matcher vores kriterier med $pull
+  // Remove authentication token from user with $unset
   return user.update({
     $unset: {
       authToken: user.authToken
@@ -116,19 +116,17 @@ UserSchema.statics.findByCredentials = function(email, password) {
     });
 };
 
-// Dette bliver kørt inden bruger bliver gemt
+// Run when user is saved
 UserSchema.pre('save', function(next) {
-  // Brugeren vi arbejder med
   let user = this;  
-  // Kør kun hvis det er passwordet der er ændret eller oprettet
+  // Only run if there is a password
   if (user.isModified('password')) {
-    // Generer salt (10 runder)
+    // Genererate salt
     bcrypt.genSalt(10, (err, salt) => {
-      // Generer hash baseret på brugerens plaintext password
+      // Generate hash
       bcrypt.hash(user.password, salt, (err, hash) => {
-        // Sæt kodeordet til den hashede udgave
+        // Change password to hashed value
         user.password = hash;
-        // Lad flowet fortsætte
         next();
       });
     });
@@ -144,7 +142,7 @@ UserSchema.pre('findOneAndUpdate', function(next) {
   // Kør kun hvis det er passwordet der er ændret eller oprettet
   if (user.password) {
     // Generer salt (10 runder)
-    bcrypt.genSalt(10, (err, salt) => {    
+    bcrypt.genSalt(10, (err, salt) => {
       // Generer hash baseret på brugerens plaintext password
       bcrypt.hash(user.password, salt, (err, hash) => {            
         // Sæt kodeordet til den hashede udgave
