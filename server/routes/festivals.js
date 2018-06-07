@@ -21,7 +21,10 @@ module.exports = (app) => {
   app.post('/festivals', (req, res) => {
     // Vælg de værdier som vi skal bruge fra request body
     let festival = new Festival(_.pick(req.body, ['link', 'description', 'name', 'startDate', 'endDate', 'address', 'zip', 'city', 'country']));
-    // Hvis der er uploadet nogle filer       
+
+    console.log(festival);
+
+    // Hvis der er uploadet nogle filer
     if (req.files) {
       let file = req.files.poster;      
       // Tilføj billede reference til festival
