@@ -26,9 +26,6 @@ const UserSchema = new mongoose.Schema({
   followedArtists: [{
     type: mongoose.Schema.Types.ObjectId
   }],
-  followedGenres: [{
-    type: String
-  }],
   followedLocations: [{
     city: {
       type: String
@@ -49,29 +46,24 @@ const UserSchema = new mongoose.Schema({
 // Når man bruger .methods laver man instance methods (metoder vi kan bruge herinde)
 // Når man bruger .statics laver man model metoder
 
-// Metode som bruges til at generere tokens på brugeren
 UserSchema.methods.generateAuthToken = function () {
-  // Gem brugeren vi arbejder med
   let user = this;
-  // Vi genererer en JWT token baseret på vores secret og laver resultatet om til en string
   let token = jwt.sign({ _id: user._id.toHexString() }, process.env.JWT_SECRET).toString();
-  // Gem token til brugeren vi arbejder med
   user.authToken = token;
-  // Gem brugeren og returner token
   return user.save()
     .then(() => {
       return token;
     })
     .catch(() => {
-      return 'Token kunne ikke genereres';
+      return 'Token could not be generated';
     });
 };
 
-// Metode som bruges til at fjerne tokens på brugeren
+// Remove authentication token from user
 UserSchema.methods.removeToken = function() {
-  // Brugeren vi arbejder med
+  // The current user
   let user = this;  
-  // Fjern elementer fra array som matcher vores kriterier med $pull
+  // Remove authentication token from user with $unset
   return user.update({
     $unset: {
       authToken: user.authToken
@@ -124,19 +116,17 @@ UserSchema.statics.findByCredentials = function(email, password) {
     });
 };
 
-// Dette bliver kørt inden bruger bliver gemt
+// Run when user is saved
 UserSchema.pre('save', function(next) {
-  // Brugeren vi arbejder med
   let user = this;  
-  // Kør kun hvis det er passwordet der er ændret eller oprettet
+  // Only run if there is a password
   if (user.isModified('password')) {
-    // Generer salt (10 runder)
+    // Genererate salt
     bcrypt.genSalt(10, (err, salt) => {
-      // Generer hash baseret på brugerens plaintext password
+      // Generate hash
       bcrypt.hash(user.password, salt, (err, hash) => {
-        // Sæt kodeordet til den hashede udgave
+        // Change password to hashed value
         user.password = hash;
-        // Lad flowet fortsætte
         next();
       });
     });
@@ -152,7 +142,7 @@ UserSchema.pre('findOneAndUpdate', function(next) {
   // Kør kun hvis det er passwordet der er ændret eller oprettet
   if (user.password) {
     // Generer salt (10 runder)
-    bcrypt.genSalt(10, (err, salt) => {    
+    bcrypt.genSalt(10, (err, salt) => {
       // Generer hash baseret på brugerens plaintext password
       bcrypt.hash(user.password, salt, (err, hash) => {            
         // Sæt kodeordet til den hashede udgave

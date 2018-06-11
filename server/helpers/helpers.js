@@ -21,8 +21,26 @@ const incrementPopularityArtist = (id) => {
       return err;
     });
 };
+const decrementPopularityArtist = (id) => {
+  Artist.findByIdAndUpdate(id, { $inc: { 'popularity': -1, } }, { new: true })
+    .then((artist) => {
+      return artist;
+    })
+    .catch((err) => {
+      return err;
+    });
+};
 const incrementPopularityFestival = (id) => {
   Festival.findByIdAndUpdate(id, { $inc: { 'popularity': 1, } }, { new: true })
+    .then((festival) => {
+      return festival;
+    })
+    .catch((err) => {
+      return err;
+    });
+};
+const decrementPopularityFestival = (id) => {
+  Festival.findByIdAndUpdate(id, { $inc: { 'popularity': -1, } }, { new: true })
     .then((festival) => {
       return festival;
     })
@@ -41,5 +59,7 @@ module.exports = {
   getModelProperties,
   incrementPopularityArtist,
   incrementPopularityFestival,
-  dedupeIDs
+  dedupeIDs,
+  decrementPopularityArtist,
+  decrementPopularityFestival
 };

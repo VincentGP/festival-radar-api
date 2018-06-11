@@ -3,60 +3,48 @@ const mongoose = require('mongoose');
 const URLSlugs = require('mongoose-url-slugs');
 
 const FestivalSchema = new mongoose.Schema({
-  location: {
-    address: {
-      type: String
-    },
-    city: {
-      type: String
-    },
-    zip: {
-      type: Number
-    },
-    country: {
-      type: String
-    },
-    latLong: [{
-      type: String
-    }]
-    // required: true
+  address: {
+    type: String,
+    required: true    
+  },
+  city: {
+    type: String,
+    required: true    
+  },
+  zip: {
+    type: String,
+    required: true    
+  },
+  country: {
+    type: String,
+    required: true
   },
   artists: [{
-    type: String
+    type: mongoose.Schema.Types.ObjectId
   }],
   startDate: {
     type: Date,
+    required: true
   },
   endDate: {
     type: Date,
-    // required: true
+    required: true
   },
   name: {
     type: String,
-    // required: true,
+    required: true,
     unique: true
-  },
-  price: {
-    type: String
-  },
-  availability: {
-    type: Number,
-    min: 1,
-    max: 3
   },
   poster: {
     type: String
   },
   description: {
     type: String,
-    // required: true
-  },
-  video: {
-    type: String
+    required: true
   },
   link: {
     type: String,
-    // required: true
+    required: true
   },
   popularity: {
     type: Number,

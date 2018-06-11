@@ -5,7 +5,7 @@ const { ObjectID } = require('mongodb');
 // Interne imports
 const { User } = require('../models/User');
 const { authenticate } = require('../middleware/authenticate');
-const { incrementPopularityArtist, incrementPopularityFestival, getModelProperties } = require('../helpers/helpers');
+const { incrementPopularityArtist, incrementPopularityFestival, getModelProperties, decrementPopularityArtist, decrementPopularityFestival } = require('../helpers/helpers');
 
 module.exports = (app) => {
   // POST: Signup som almindelig bruger
@@ -44,29 +44,22 @@ module.exports = (app) => {
         res.status(400).send(err);
       });
   });
-  // POST: Login som almindelig bruger
+  //
   app.post('/users/login', (req, res) => {
     let body = _.pick(req.body, ['email', 'password']);
-    // Find bruger baseret på request body
     User.findByCredentials(body.email, body.password)
       .then((user) => {
-        // Fjern token hvis der er en nuværende (i tilfælde af at token manuelt bliver ændret ellers kan det resultere i at der kan gemmes mange tokens på en bruger)
-        let auth = user.tokens;        
-        // Hvis der er en token
-        if (auth) user.removeToken();
-        // Der skal genereres ny auth token hver gang bruger logger ind
         return user.generateAuthToken()
           .then((token) => {
-            // Send header tilbage til bruger med brugerinfo, token og udløbstid
-            res.header('x-auth', token).status(200).send({ user, expiresIn: 3600 });
+            res.header('x-auth', token).status(200).send({ user, expiresIn: 3600 * 24 });
           });
       })
       .catch((err) => {
-        // Hvis bruger ikke kunne findes        
         res.status(400).send(err);
       });
   });
-  // GET: Validér token ved automatisk login og send brugeren med tilbage
+  
+  
   app.get('/users/validate', authenticate, (req, res) => {
     let user = req.user;    
     res.status(200).send(user);
@@ -95,10 +88,8 @@ module.exports = (app) => {
   });
   // DELETE: Log bruger ud
   app.delete('/users', authenticate, (req, res) => {
-    // Brugerobjektet + token (der kommer fra req) stammer fra vores authenticate middleware
     let user = req.user;
-    let token = req.token;
-    user.removeToken(token)
+    user.removeToken()
       .then(() => {
         res.status(200).send();
       })
@@ -107,10 +98,10 @@ module.exports = (app) => {
       });
   });
   // POST: Tilføj kunster til favoritter
-  app.post('/users/artists', authenticate, (req, res) => {
+  app.post('/users/artists/:id', authenticate, (req, res) => {
     // Gem nuværende bruger
     let user = req.user;
-    let artistId = ObjectID(req.body.artistId);
+    let artistId = ObjectID(req.params.id);
     // Hvis id'et ikke er et korrekt ObjectID    
     if (!ObjectID.isValid(artistId)) {
       return res.status(404).send();
@@ -123,7 +114,7 @@ module.exports = (app) => {
         res.status(200).send(user);
       })
       .catch((err) => {
-        res.status(400).send(err); 
+        res.status(400).send(err);
       });
   });
   // POST: Tilføj festival til favoritter
@@ -146,29 +137,17 @@ module.exports = (app) => {
         res.status(400).send(err); 
       });
   });
-  // POST: Tilføj genre til favoritter
-  app.post('/users/genres', authenticate, (req, res) => {
-    // Gem nuværende bruger
-    let user = req.user;      
-    let genre = req.body.genre;
-    // Push genre til brugerens favorit array
-    user.update({ $addToSet: { followedGenres: genre } })
-      .then((user) => {
-        res.status(200).send(user);
-      })
-      .catch((err) => {
-        res.status(400).send(err); 
-      });
-  });
   // DELETE: Fjern kunstner fra favoritter
-  app.delete('/users/artists', authenticate, (req, res) => {
+  app.delete('/users/artists/:id', authenticate, (req, res) => {
     // Gem nuværende bruger
     let user = req.user;
-    let artistId = ObjectID(req.body.artistId);
+    let artistId = ObjectID(req.params.id);
     // Hvis id'et ikke er et korrekt ObjectID    
     if (!ObjectID.isValid(artistId)) {      
       return res.status(404).send();
     }
+    // Dekrementer popularitet
+    decrementPopularityArtist(artistId);
     // Fjern kunstner fra brugerens favorit array
     user.update({ $pull: { followedArtists: artistId } })
       .then((user) => {
@@ -183,10 +162,12 @@ module.exports = (app) => {
     // Gem nuværende bruger
     let user = req.user;
     let festivalId = ObjectID(req.params.id);
-    // Hvis id'et ikke er et korrekt ObjectID    
+    // Hvis id'et ikke er et korrekt ObjectID
     if (!ObjectID.isValid(festivalId)) {
       return res.status(404).send();
     }
+    // Dekrementer popularitet
+    decrementPopularityFestival(festivalId);
     // Fjern festival fra brugerens favorit array
     user.update({ $pull: { followedFestivals: festivalId } })
       .then((user) => {
@@ -194,20 +175,6 @@ module.exports = (app) => {
       })
       .catch((err) => {
         res.status(400).send(err); 
-      });
-  });
-  // DELETE: Fjern genre fra favoritter
-  app.delete('/users/genres', authenticate, (req, res) => {
-    // Gem nuværende bruger
-    let user = req.user;
-    let genre = req.body.genre;
-    // Fjern genre fra brugerens favorit array
-    user.update({ $pull: { followedGenres: genre } })
-      .then((user) => {
-        res.status(200).send(user);
-      })
-      .catch((err) => {
-        res.status(400).send(err);
       });
   });
 };

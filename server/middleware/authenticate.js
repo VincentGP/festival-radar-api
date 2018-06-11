@@ -1,10 +1,9 @@
-// Interne imports
 const { User } = require('../models/User');
 
 // Middleware authenticate
 const authenticate = (req, res, next) => {
   // Hent token fra vores custom authentication header
-  let token = req.header('x-auth');  
+  let token = req.header('x-auth');    
   // Vi bruger vores hjemmelavede metode til at finde frem til bruger ud fra token fra header
   User.findByToken(token)
     .then((user) => {
